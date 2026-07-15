@@ -147,6 +147,8 @@ export interface Persona {
   label: string;
   description: string;
   avatarInitials: string;
+  /** SE-created demo profile stored in the browser */
+  isCustom?: boolean;
   profile: ProfileDetails;
   summary: DashboardSummary;
   heroGreeting: string;
@@ -159,6 +161,26 @@ export interface Persona {
   alerts: AlertItem[];
   resources: ResourceItem[];
   careRecipients?: { name: string; relationship: string; memberId: string }[];
+}
+
+/** Editable profile fields for create/edit demo users */
+export interface PersonaProfileInput {
+  displayName: string;
+  preferredName?: string;
+  email: string;
+  phone: string;
+  dateOfBirth: string;
+  memberId: string;
+  planName: string;
+  primaryCareProvider: string;
+  pharmacy: string;
+  addressLine1: string;
+  addressLine2?: string;
+  city: string;
+  state: string;
+  zip: string;
+  role: Persona["role"];
+  description?: string;
 }
 
 export interface SitecorePortalContent {

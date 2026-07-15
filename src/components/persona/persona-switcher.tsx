@@ -2,6 +2,7 @@
 
 import { Check, Users } from "lucide-react";
 import { usePersona } from "@/components/persona/persona-provider";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -21,6 +22,9 @@ export function PersonaSwitcher({ className }: { className?: string }) {
     return null;
   }
 
+  const builtIn = personas.filter((p) => !p.isCustom);
+  const custom = personas.filter((p) => p.isCustom);
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -35,24 +39,69 @@ export function PersonaSwitcher({ className }: { className?: string }) {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-72">
-        <DropdownMenuLabel>Member profiles</DropdownMenuLabel>
+        <DropdownMenuLabel>Built-in profiles</DropdownMenuLabel>
         <DropdownMenuSeparator />
-        {personas.map((p) => (
-          <DropdownMenuItem
+        {builtIn.map((p) => (
+          <PersonaMenuItem
             key={p.id}
-            onClick={() => setPersonaId(p.id)}
-            className="flex flex-col items-start gap-1 py-2"
-          >
-            <div className="flex w-full items-center justify-between gap-2">
-              <span className="font-medium">{p.label}</span>
-              {p.id === persona.id ? (
-                <Check className="h-4 w-4 text-primary" />
-              ) : null}
-            </div>
-            <span className="text-xs text-muted-foreground">{p.description}</span>
-          </DropdownMenuItem>
+            label={p.label}
+            description={p.description}
+            selected={p.id === persona.id}
+            onSelect={() => setPersonaId(p.id)}
+          />
         ))}
+        {custom.length > 0 ? (
+          <>
+            <DropdownMenuSeparator />
+            <DropdownMenuLabel>Custom demo users</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            {custom.map((p) => (
+              <PersonaMenuItem
+                key={p.id}
+                label={p.label}
+                description={p.profile.email}
+                selected={p.id === persona.id}
+                custom
+                onSelect={() => setPersonaId(p.id)}
+              />
+            ))}
+          </>
+        ) : null}
       </DropdownMenuContent>
     </DropdownMenu>
+  );
+}
+
+function PersonaMenuItem({
+  label,
+  description,
+  selected,
+  custom,
+  onSelect,
+}: {
+  label: string;
+  description: string;
+  selected: boolean;
+  custom?: boolean;
+  onSelect: () => void;
+}) {
+  return (
+    <DropdownMenuItem
+      onClick={onSelect}
+      className="flex flex-col items-start gap-1 py-2"
+    >
+      <div className="flex w-full items-center justify-between gap-2">
+        <span className="flex items-center gap-2 font-medium">
+          {label}
+          {custom ? (
+            <Badge variant="secondary" className="text-[10px]">
+              Custom
+            </Badge>
+          ) : null}
+        </span>
+        {selected ? <Check className="h-4 w-4 text-primary" /> : null}
+      </div>
+      <span className="text-xs text-muted-foreground">{description}</span>
+    </DropdownMenuItem>
   );
 }

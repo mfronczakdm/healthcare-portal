@@ -1,10 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { Pencil, Plus, Trash2 } from "lucide-react";
 import { OpenTasks } from "@/components/dashboard/open-tasks";
+import { PersonaFormDialog } from "@/components/persona/persona-form-dialog";
 import { usePersona } from "@/components/persona/persona-provider";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,10 +15,17 @@ import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { portalEventTypes, trackPortalEvent } from "@/lib/tracking";
 import { formatDate } from "@/lib/utils";
+import type { PersonaProfileInput } from "@/types/portal";
 
 export function ProfilePageClient() {
-  const { persona } = usePersona();
+  const {
+    persona,
+    addCustomPersona,
+    updateCurrentPersona,
+    deleteCustomPersona,
+  } = usePersona();
   const { profile } = persona;
+
   const [emailNotifications, setEmailNotifications] = useState(
     profile.preferences.emailNotifications
   );
@@ -25,14 +35,58 @@ export function ProfilePageClient() {
   const [marketingOptIn, setMarketingOptIn] = useState(
     profile.preferences.marketingOptIn
   );
+  const [createOpen, setCreateOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
+
+  useEffect(() => {
+    setEmailNotifications(profile.preferences.emailNotifications);
+    setSmsReminders(profile.preferences.smsReminders);
+    setMarketingOptIn(profile.preferences.marketingOptIn);
+  }, [persona.id, profile.preferences]);
+
+  const handleCreate = (input: PersonaProfileInput) => {
+    addCustomPersona(input);
+  };
+
+  const handleEdit = (input: PersonaProfileInput) => {
+    updateCurrentPersona(input);
+  };
+
+  const handleDelete = () => {
+    if (!persona.isCustom) return;
+    const confirmed = window.confirm(
+      `Remove custom demo user “${persona.label}”? This cannot be undone on this browser.`
+    );
+    if (confirmed) deleteCustomPersona(persona.id);
+  };
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Profile</h1>
-        <p className="text-sm text-muted-foreground">
-          Account details, preferences, and care info
-        </p>
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight">Profile</h1>
+          <p className="text-sm text-muted-foreground">
+            Account details, preferences, and care info
+          </p>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <Button onClick={() => setCreateOpen(true)}>
+            <Plus className="h-4 w-4" />
+            Add demo user
+          </Button>
+          {persona.isCustom ? (
+            <>
+              <Button variant="outline" onClick={() => setEditOpen(true)}>
+                <Pencil className="h-4 w-4" />
+                Edit
+              </Button>
+              <Button variant="outline" onClick={handleDelete}>
+                <Trash2 className="h-4 w-4" />
+                Delete
+              </Button>
+            </>
+          ) : null}
+        </div>
       </div>
 
       <Card>
@@ -49,6 +103,9 @@ export function ProfilePageClient() {
               <Badge variant="secondary">Member ID {profile.memberId}</Badge>
               <Badge variant="outline">{profile.planName}</Badge>
               <Badge>{persona.role}</Badge>
+              {persona.isCustom ? (
+                <Badge variant="info">Custom demo</Badge>
+              ) : null}
             </div>
           </div>
         </CardContent>
@@ -60,9 +117,15 @@ export function ProfilePageClient() {
             <CardTitle className="text-lg">Contact & coverage</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <Field label="Preferred name" value={profile.preferredName ?? profile.displayName} />
+            <Field
+              label="Preferred name"
+              value={profile.preferredName ?? profile.displayName}
+            />
             <Field label="Phone" value={profile.phone} />
-            <Field label="Date of birth" value={formatDate(profile.dateOfBirth)} />
+            <Field
+              label="Date of birth"
+              value={formatDate(profile.dateOfBirth)}
+            />
             <Field label="Primary care" value={profile.primaryCareProvider} />
             <Field label="Pharmacy" value={profile.pharmacy} />
             <Field
@@ -163,6 +226,22 @@ export function ProfilePageClient() {
           </div>
         </CardContent>
       </Card>
+
+      <PersonaFormDialog
+        key={`create-${createOpen}`}
+        open={createOpen}
+        onOpenChange={setCreateOpen}
+        mode="create"
+        onSubmit={handleCreate}
+      />
+      <PersonaFormDialog
+        key={`edit-${persona.id}-${editOpen}`}
+        open={editOpen}
+        onOpenChange={setEditOpen}
+        mode="edit"
+        persona={persona}
+        onSubmit={handleEdit}
+      />
     </div>
   );
 }
