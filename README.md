@@ -1,36 +1,104 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# CareConnect Portal
 
-## Getting Started
+Production-quality healthcare member portal scaffold built with Next.js App Router, TypeScript, Tailwind CSS, and shadcn/ui patterns. Includes Sitecore Edge GraphQL integration hooks, identity/event tracking placeholders, theming via CSS variables, and swappable mock personas.
 
-First, run the development server:
+## Quick start
 
 ```bash
+npm install
+cp .env.example .env.local
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Rebrand for another client
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+1. Edit `src/lib/config/brand.ts` — app name, logo text/path, feature flags, footer.
+2. Update CSS tokens in `src/app/globals.css` (`:root` / `.dark`).
+3. Replace `public/brand/logo.svg` (or point `logoImagePath` at your asset).
+4. Set `NEXT_PUBLIC_APP_NAME` in `.env.local`.
 
-## Learn More
+## Outbound links (Read article, resources, etc.)
 
-To learn more about Next.js, take a look at the following resources:
+Edit **`src/lib/config/external-links.ts`** — one place for URLs to the client Sitecore/marketing site.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```typescript
+site: { home: "https://rocklandtrust-azure.vercel.app/" },
+defaults: { article: "...", resource: "..." },
+articles: { r1: "https://...", r2: "..." },  // keys = recommendation ids
+resources: { res1: "https://..." },
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+No component changes needed. External URLs open in a new tab.
 
-## Deploy on Vercel
+## Point at your SitecoreAI environment
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+**Connection** (`.env.local`):
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- `SITECORE_EDGE_ENDPOINT`
+- `SITECORE_API_KEY` and/or `SITECORE_EDGE_CONTEXT_ID`
+
+**Queries** (`src/lib/sitecore/queries/` — no env vars per slot):
+
+1. Open the query file for your page/slot, e.g. `queries/home/promo.query.ts`
+2. Edit `GQL_HOME_PROMO_QUERY` and/or `homePromoQueryVariables` (path, language, site)
+3. See `src/lib/sitecore/queries/README.md` for adding new page partials
+
+When Sitecore Edge promo content is unavailable, the welcome-page promotion shows **MOCK DATA**. Live Edge promos show **SITECORE(LIVE)**. Account and persona UI never show these labels.
+
+## Mock personas
+
+Edit `src/lib/mock-data/personas.ts`. Switch profiles from the header persona menu (patient, caregiver, power user).
+
+## Tracking (Sitecore Unified Data Layer)
+
+Uses `@sitecore-cloudsdk/core` and `@sitecore-cloudsdk/events` for browser-side tracking.
+
+**Env** (`.env.local`):
+
+- `NEXT_PUBLIC_SITECORE_EDGE_CONTEXT_ID` — required for Cloud SDK
+- `NEXT_PUBLIC_DEFAULT_SITE_NAME` — Sitecore site name (event prefix, e.g. `novacare:VIEW_MESSAGE`)
+- `NEXT_PUBLIC_SITECORE_TRACKING_ENABLED` — set `false` to disable network calls
+- `NEXT_PUBLIC_SITECORE_COOKIE_DOMAIN` — optional cookie domain
+
+**Channel** is fixed to `PORTAL` in `src/lib/config/tracking-config.ts`.
+
+**IDENTITY** events fire when a demo persona loads, using the `email` identifier provider (`alex.rivera@email.com`, etc.).
+
+**Page events** (on navigation): `VIEW_HOME`, `VIEW_MESSAGE`, `VIEW_APPOINTMENTS`, `VIEW_RESOURCES`, `VIEW_RESULTS`, `VIEW_PROFILE`.
+
+**Interaction events**: `OPEN_MESSAGE`, `CLICKED_CTA`, `CLICKED_PROMO`, `CONTENT_IMPRESSION`, `PERSONA_SWITCH`, `PREFERENCE_UPDATE`.
+
+Verify payloads in DevTools → Network → filter `edge-platform.sitecorecloud.io`.
+
+## Project structure
+
+```
+src/
+  app/                  # App Router pages
+  components/
+    ui/                 # shadcn-style primitives
+    layout/             # portal chrome
+    content/            # Sitecore/mock content modules
+    dashboard/          # home widgets
+    persona/            # persona switcher + provider
+  lib/
+    config/             # brand + Edge connection env
+    sitecore/
+      queries/          # GQL_* documents + default variables (by page/slot)
+      loaders/          # per-partial fetch + map + fallback
+      execute-query.ts  # generic Edge executor
+    tracking/           # identity + events
+    mock-data/          # personas + Sitecore fallbacks
+  types/
+```
+
+## Scripts
+
+| Command       | Description              |
+|---------------|--------------------------|
+| `npm run dev` | Start local development  |
+| `npm run build` | Production build       |
+| `npm run start` | Run production server  |
+| `npm run lint`  | ESLint                 |

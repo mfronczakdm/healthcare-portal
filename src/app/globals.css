@@ -1,26 +1,184 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+
+/* ─────────────────────────────────────────────────────────────
+   CareConnect Health — logo palette
+   Blue #0072BC · Green #7DC242
+   Keep hex values aligned with lib/config/brand.ts colors.
+   ───────────────────────────────────────────────────────────── */
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --radius: 0.625rem;
+
+  --background: #f8fafb;
+  --foreground: #1a2332;
+
+  --card: #ffffff;
+  --card-foreground: #1a2332;
+
+  --popover: #ffffff;
+  --popover-foreground: #1a2332;
+
+  --primary: #0072bc;
+  --primary-foreground: #ffffff;
+
+  --secondary: #edf5e4;
+  --secondary-foreground: #3d6218;
+
+  --muted: #f0f4f8;
+  --muted-foreground: #5a6578;
+
+  --accent: #7dc242;
+  --accent-foreground: #ffffff;
+
+  --destructive: #c41e3a;
+  --destructive-foreground: #ffffff;
+
+  --border: #dde4eb;
+  --input: #dde4eb;
+  --ring: #0072bc;
+
+  --success: #7dc242;
+  --success-foreground: #ffffff;
+  --warning: #b45309;
+  --warning-foreground: #fffbeb;
+  --info: #0072bc;
+  --info-foreground: #ffffff;
+
+  --sidebar: #ffffff;
+  --sidebar-foreground: #1a2332;
+  --sidebar-border: #dde4eb;
+  --sidebar-accent: #e6f2fa;
+  --sidebar-accent-foreground: #0072bc;
+
+  --chart-1: #0072bc;
+  --chart-2: #7dc242;
+  --chart-3: #005a94;
+  --chart-4: #5a6578;
+  --chart-5: #1a2332;
+
+  --mock-badge: #92400e;
+  --mock-badge-bg: #fef3c7;
+  --live-badge: #0072bc;
+  --live-badge-bg: #e6f2fa;
+
+  --surface-gradient-from: #e6f2fa;
+  --surface-gradient-via: #f8fafb;
+  --surface-gradient-to: #edf5e4;
+}
+
+.dark {
+  --background: #0f0f0f;
+  --foreground: #f0f4f8;
+
+  --card: #1a1a1a;
+  --card-foreground: #f0f4f8;
+
+  --popover: #1a1a1a;
+  --popover-foreground: #f0f4f8;
+
+  --primary: #0072bc;
+  --primary-foreground: #ffffff;
+
+  --secondary: #1e2a1a;
+  --secondary-foreground: #edf5e4;
+
+  --muted: #242424;
+  --muted-foreground: #94a3b8;
+
+  --accent: #7dc242;
+  --accent-foreground: #ffffff;
+
+  --destructive: #f87171;
+  --destructive-foreground: #450a0a;
+
+  --border: #2e2e2e;
+  --input: #2e2e2e;
+  --ring: #7dc242;
+
+  --success: #7dc242;
+  --success-foreground: #ffffff;
+  --warning: #fbbf24;
+  --warning-foreground: #451a03;
+  --info: #0072bc;
+  --info-foreground: #ffffff;
+
+  --sidebar: #0f0f0f;
+  --sidebar-foreground: #f0f4f8;
+  --sidebar-border: #2e2e2e;
+  --sidebar-accent: #0072bc;
+  --sidebar-accent-foreground: #ffffff;
+
+  --mock-badge: #fcd34d;
+  --mock-badge-bg: #78350f;
+  --live-badge: #7ec8f0;
+  --live-badge-bg: #003d66;
+
+  --surface-gradient-from: #0f0f0f;
+  --surface-gradient-via: #1a1a1a;
+  --surface-gradient-to: #1e2a1a;
 }
 
 @theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-info: var(--info);
+  --color-info-foreground: var(--info-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-mock-badge: var(--mock-badge);
+  --color-mock-badge-bg: var(--mock-badge-bg);
+  --color-live-badge: var(--live-badge);
+  --color-live-badge-bg: var(--live-badge-bg);
+
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
   }
-}
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  body {
+    @apply bg-background text-foreground antialiased;
+    background-image:
+      radial-gradient(ellipse 80% 50% at 0% -20%, var(--surface-gradient-from), transparent),
+      radial-gradient(ellipse 60% 40% at 100% 0%, var(--surface-gradient-to), transparent);
+    background-attachment: fixed;
+    min-height: 100vh;
+  }
+
+  a {
+    @apply transition-colors;
+  }
 }

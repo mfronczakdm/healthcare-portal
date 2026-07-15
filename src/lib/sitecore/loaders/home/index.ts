@@ -1,0 +1,1 @@
+export { loadHomePromo } from "./promo";
