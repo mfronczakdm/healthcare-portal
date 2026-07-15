@@ -2,16 +2,11 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect } from "react";
 import { ArrowRight, Megaphone } from "lucide-react";
 import { SitecoreSourceBadge } from "@/components/content/source-badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import {
-  portalEventTypes,
-  trackContentImpression,
-  trackPortalEvent,
-} from "@/lib/tracking";
+import { portalEventTypes, trackPortalEvent } from "@/lib/tracking";
 import { cn } from "@/lib/utils";
 import type { PromoContent } from "@/types/portal";
 
@@ -29,15 +24,6 @@ export function PromoBanner({
   /** Dev-only: why Edge fallback was used */
   edgeError?: string;
 }) {
-  useEffect(() => {
-    trackContentImpression({
-      contentId: promo.id,
-      title: promo.promoText,
-      source: promo.source,
-      placement: "home-promo",
-    });
-  }, [promo.id, promo.promoText, promo.source]);
-
   const ctaLabel = promo.promoLinkLabel ?? "Learn more";
   const ctaHref = promo.promoLinkHref;
 
@@ -45,7 +31,7 @@ export function PromoBanner({
     trackPortalEvent(portalEventTypes.clickedPromo, {
       contentId: promo.id,
       label: ctaLabel,
-      href: ctaHref,
+      ...(ctaHref ? { href: ctaHref } : {}),
       source: promo.source,
     });
   };

@@ -24,7 +24,14 @@ function normalizePhone(phone: string): string {
   return phone;
 }
 
-/** Build a Sitecore IDENTITY payload from a demo persona (email provider). */
+/**
+ * Build a Sitecore IDENTITY payload from a demo persona (email provider).
+ *
+ * Note: Edge Events currently expects address `street` as a string internally.
+ * Sending string[] (SDK/docs shape) causes:
+ *   ArrayList cannot be cast to String
+ * So street lines go in extensionData instead.
+ */
 export function buildPersonaIdentityData(
   persona: Persona,
   page = "home"
@@ -42,7 +49,6 @@ export function buildPersonaIdentityData(
     lastName,
     phone: normalizePhone(profile.phone),
     mobile: normalizePhone(profile.phone),
-    street: [profile.address.line1],
     city: profile.address.city,
     state: profile.address.state,
     postalCode: profile.address.zip,
@@ -58,6 +64,7 @@ export function buildPersonaIdentityData(
       memberId: profile.memberId,
       role: persona.role,
       planName: profile.planName,
+      street: profile.address.line1,
     },
   };
 }

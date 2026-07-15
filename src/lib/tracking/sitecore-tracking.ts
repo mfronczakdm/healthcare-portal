@@ -3,7 +3,6 @@ import {
   identity,
   pageView,
   type EventData,
-  type ExtensionData,
   type IdentityData,
 } from "@sitecore-cloudsdk/events/browser";
 import {
@@ -17,15 +16,9 @@ import { buildPersonaIdentityData } from "@/lib/tracking/persona-identity";
 import { initCloudSdk, isCloudSdkConfigured } from "@/lib/tracking/cloud-sdk";
 import type { Persona } from "@/types/portal";
 
-/**
- * Sitecore Unified Data Layer tracking via @sitecore-cloudsdk/events.
- *
- *   trackPageView({ page: "/messages" })
- *   trackPortalEvent("VIEW_MESSAGE")
- *   identifyPersona(persona)
- */
-
-export type TrackingPayload = Record<string, unknown>;
+/** Flat extension attributes accepted by Cloud SDK events. */
+export type ExtensionData = Record<string, string | number | boolean>;
+export type TrackingPayload = ExtensionData;
 
 export interface IdentityContext {
   anonymousId?: string;
@@ -202,7 +195,7 @@ export function trackCtaClick(click: CtaClickEvent) {
   trackPortalEvent("CLICKED_CTA", {
     ctaId: click.ctaId,
     label: click.label,
-    href: click.href,
+    ...(click.href ? { href: click.href } : {}),
     source: click.source ?? "chrome",
   });
 }
@@ -212,7 +205,7 @@ export function trackContentImpression(impression: ContentImpressionEvent) {
     contentId: impression.contentId,
     title: impression.title,
     source: impression.source,
-    placement: impression.placement,
+    ...(impression.placement ? { placement: impression.placement } : {}),
   });
 }
 

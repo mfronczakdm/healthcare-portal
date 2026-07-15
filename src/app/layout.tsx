@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { PageViewTracker } from "@/components/analytics/page-view-tracker";
 import { SitecoreTrackingInit } from "@/components/analytics/sitecore-tracking-init";
 import { PortalShell } from "@/components/layout/portal-shell";
 import { PersonaProvider } from "@/components/persona/persona-provider";
@@ -44,7 +43,6 @@ export default function RootLayout({
         >
           <PersonaProvider>
             <SitecoreTrackingInit />
-            <PageViewTracker />
             <PortalShell>{children}</PortalShell>
           </PersonaProvider>
         </ThemeProvider>

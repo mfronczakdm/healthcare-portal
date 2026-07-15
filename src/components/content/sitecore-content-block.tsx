@@ -1,29 +1,18 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect } from "react";
 import { SitecoreSourceBadge } from "@/components/content/source-badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { trackContentImpression, trackCtaClick } from "@/lib/tracking";
+import { trackCtaClick } from "@/lib/tracking";
 import type { ContentBlock } from "@/types/portal";
 
 export function SitecoreContentBlock({
   block,
-  placement = "content-block",
 }: {
   block: ContentBlock;
   placement?: string;
 }) {
-  useEffect(() => {
-    trackContentImpression({
-      contentId: block.id,
-      title: block.heading,
-      source: block.source,
-      placement,
-    });
-  }, [block.id, block.heading, block.source, placement]);
-
   return (
     <Card>
       <CardHeader className="flex flex-row items-start justify-between gap-3 space-y-0">

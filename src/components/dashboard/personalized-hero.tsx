@@ -3,7 +3,7 @@
 import { usePersona } from "@/components/persona/persona-provider";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { trackCtaClick } from "@/lib/tracking";
+import { portalEventTypes, trackPortalEvent } from "@/lib/tracking";
 import Link from "next/link";
 
 export function PersonalizedHero() {
@@ -31,11 +31,10 @@ export function PersonalizedHero() {
           <Link
             href="/appointments"
             onClick={() =>
-              trackCtaClick({
+              trackPortalEvent(portalEventTypes.viewAppointments, {
                 ctaId: "hero-schedule",
                 label: "View appointments",
                 href: "/appointments",
-                source: "chrome",
               })
             }
           >
@@ -46,11 +45,10 @@ export function PersonalizedHero() {
           <Link
             href="/messages"
             onClick={() =>
-              trackCtaClick({
+              trackPortalEvent(portalEventTypes.viewMessage, {
                 ctaId: "hero-messages",
                 label: "Open messages",
                 href: "/messages",
-                source: "chrome",
               })
             }
           >

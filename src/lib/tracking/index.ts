@@ -29,7 +29,6 @@ export {
   trackingConfig,
   formatEventType,
   getPageSlug,
-  getPageViewEventType,
 } from "@/lib/config/tracking-config";
 
 export type { PortalEventType } from "@/lib/config/tracking-config";

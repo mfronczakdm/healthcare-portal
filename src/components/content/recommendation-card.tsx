@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect } from "react";
 import { ArrowRight, ExternalLink } from "lucide-react";
 import { getArticleLink, isExternalUrl } from "@/lib/config/resolve-external-link";
 import { Button } from "@/components/ui/button";
@@ -13,27 +12,17 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { trackContentImpression, trackCtaClick } from "@/lib/tracking";
+import { trackCtaClick } from "@/lib/tracking";
 import type { RecommendationItem } from "@/types/portal";
 
 export function RecommendationCard({
   item,
-  placement = "recommendations",
 }: {
   item: RecommendationItem;
   placement?: string;
 }) {
   const articleUrl = getArticleLink(item.id);
   const external = isExternalUrl(articleUrl);
-
-  useEffect(() => {
-    trackContentImpression({
-      contentId: item.id,
-      title: item.title,
-      source: "mock",
-      placement,
-    });
-  }, [item.id, item.title, placement]);
 
   const handleClick = () => {
     trackCtaClick({

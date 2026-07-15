@@ -58,17 +58,24 @@ Uses `@sitecore-cloudsdk/core` and `@sitecore-cloudsdk/events` for browser-side 
 **Env** (`.env.local`):
 
 - `NEXT_PUBLIC_SITECORE_EDGE_CONTEXT_ID` — required for Cloud SDK
-- `NEXT_PUBLIC_DEFAULT_SITE_NAME` — Sitecore site name (event prefix, e.g. `novacare:VIEW_MESSAGE`)
+- `NEXT_PUBLIC_DEFAULT_SITE_NAME` — Sitecore site name (event prefix, e.g. `novacare/VIEW_MESSAGE`)
 - `NEXT_PUBLIC_SITECORE_TRACKING_ENABLED` — set `false` to disable network calls
 - `NEXT_PUBLIC_SITECORE_COOKIE_DOMAIN` — optional cookie domain
 
 **Channel** is fixed to `PORTAL` in `src/lib/config/tracking-config.ts`.
 
-**IDENTITY** events fire when a demo persona loads, using the `email` identifier provider (`alex.rivera@email.com`, etc.).
+**IDENTITY** events fire when a demo persona loads or is switched, using the `email` identifier provider (`alex.rivera@email.com`, etc.).
 
-**Page events** (on navigation): `VIEW_HOME`, `VIEW_MESSAGE`, `VIEW_APPOINTMENTS`, `VIEW_RESOURCES`, `VIEW_RESULTS`, `VIEW_PROFILE`.
+**No automatic page-view or impression events.** Custom events fire only on clicks:
 
-**Interaction events**: `OPEN_MESSAGE`, `CLICKED_CTA`, `CLICKED_PROMO`, `CONTENT_IMPRESSION`, `PERSONA_SWITCH`, `PREFERENCE_UPDATE`.
+- Hero: `VIEW_APPOINTMENTS`, `VIEW_MESSAGE`
+- Promo CTA: `CLICKED_PROMO`
+- Other CTAs / resources: `CLICKED_CTA`
+- Message open: `OPEN_MESSAGE`
+- Persona switch: `PERSONA_SWITCH`
+- Preference toggles: `PREFERENCE_UPDATE`
+
+Event `type` format: `novacare/VIEW_MESSAGE` (must match `^[a-zA-Z0-9\-_./]{1,100}$`).
 
 Verify payloads in DevTools → Network → filter `edge-platform.sitecorecloud.io`.
 
