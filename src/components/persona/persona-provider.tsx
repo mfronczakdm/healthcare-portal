@@ -10,12 +10,7 @@ import {
   saveCustomPersonas,
   updateCustomPersona,
 } from "@/lib/mock-data";
-import {
-  identifyPersona,
-  resetIdentity,
-  trackPortalEvent,
-} from "@/lib/tracking";
-import { portalEventTypes } from "@/lib/config/tracking-config";
+import { switchPersonaTracking } from "@/lib/tracking";
 import type { Persona, PersonaProfileInput } from "@/types/portal";
 
 const PERSONA_COOKIE = "cc_persona_id";
@@ -56,6 +51,8 @@ export function PersonaProvider({
   const [personaId, setPersonaIdState] = React.useState(
     initialPersonaId ?? defaultPersonaId
   );
+  const trackedEmailRef = React.useRef<string | null>(null);
+  const switchInFlightRef = React.useRef(false);
 
   React.useEffect(() => {
     const stored = loadCustomPersonas();
@@ -90,8 +87,19 @@ export function PersonaProvider({
 
   React.useEffect(() => {
     if (!hydrated || !persona) return;
-    resetIdentity();
-    identifyPersona(persona);
+    const email = persona.profile.email.toLowerCase();
+    if (trackedEmailRef.current === email) return;
+    if (switchInFlightRef.current) return;
+
+    switchInFlightRef.current = true;
+
+    void switchPersonaTracking(persona)
+      .then(() => {
+        trackedEmailRef.current = email;
+      })
+      .finally(() => {
+        switchInFlightRef.current = false;
+      });
   }, [persona, hydrated]);
 
   const persistCustom = React.useCallback((next: Persona[]) => {
@@ -102,9 +110,9 @@ export function PersonaProvider({
   const setPersonaId = React.useCallback(
     (id: string) => {
       if (!findPersona(id)) return;
+      // Do not fire PERSONA_SWITCH — switching starts a new Sitecore guest session
       setPersonaIdState(id);
       writeCookie(PERSONA_COOKIE, id);
-      trackPortalEvent(portalEventTypes.personaSwitch, { personaId: id });
     },
     [findPersona]
   );
@@ -116,10 +124,6 @@ export function PersonaProvider({
       persistCustom(next);
       setPersonaIdState(created.id);
       writeCookie(PERSONA_COOKIE, created.id);
-      trackPortalEvent(portalEventTypes.personaSwitch, {
-        personaId: created.id,
-        action: "create",
-      });
       return created;
     },
     [customPersonas, persistCustom]
@@ -133,6 +137,12 @@ export function PersonaProvider({
         p.id === updated.id ? updated : p
       );
       persistCustom(next);
+      if (
+        updated.profile.email.toLowerCase() !==
+        persona.profile.email.toLowerCase()
+      ) {
+        trackedEmailRef.current = null;
+      }
       return updated;
     },
     [persona, customPersonas, persistCustom]
@@ -144,6 +154,7 @@ export function PersonaProvider({
       persistCustom(next);
       if (personaId === id) {
         const fallback = builtInPersonas[0]?.id ?? defaultPersonaId;
+        trackedEmailRef.current = null;
         setPersonaIdState(fallback);
         writeCookie(PERSONA_COOKIE, fallback);
       }

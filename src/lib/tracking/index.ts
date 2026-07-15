@@ -1,5 +1,7 @@
 export {
   identifyPersona,
+  identifyPersonaAsync,
+  switchPersonaTracking,
   initIdentity,
   getIdentity,
   isTrackingInitialized,
@@ -12,7 +14,13 @@ export {
   resetIdentity,
 } from "./sitecore-tracking";
 
-export { initCloudSdk, isCloudSdkConfigured, isCloudSdkInitialized } from "./cloud-sdk";
+export {
+  initCloudSdk,
+  isCloudSdkConfigured,
+  isCloudSdkInitialized,
+  resetCloudSdkGuest,
+  clearSitecoreTrackingCookies,
+} from "./cloud-sdk";
 export { buildPersonaIdentityData } from "./persona-identity";
 
 export type {

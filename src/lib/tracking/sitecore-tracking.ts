@@ -13,7 +13,11 @@ import {
 } from "@/lib/config/tracking-config";
 import { trackingEnv } from "@/lib/config/sitecore-env";
 import { buildPersonaIdentityData } from "@/lib/tracking/persona-identity";
-import { initCloudSdk, isCloudSdkConfigured } from "@/lib/tracking/cloud-sdk";
+import {
+  initCloudSdk,
+  isCloudSdkConfigured,
+  resetCloudSdkGuest,
+} from "@/lib/tracking/cloud-sdk";
 import type { Persona } from "@/types/portal";
 
 /** Flat extension attributes accepted by Cloud SDK events. */
@@ -55,6 +59,8 @@ export interface ContentImpressionEvent {
 let identityContext: IdentityContext = {};
 let identityInitialized = false;
 let currentPage = "home";
+/** Email last used for IDENTITY in the current Sitecore browser guest */
+let identifiedEmail: string | null = null;
 
 function canTrack() {
   return typeof window !== "undefined";
@@ -125,11 +131,7 @@ async function sendPortalEvent(
   }
 }
 
-/** Initialize Cloud SDK identity from a demo persona (email provider). */
-export function identifyPersona(persona: Persona, page?: string) {
-  const slug = page ?? currentPage;
-  const data = buildPersonaIdentityData(persona, slug);
-
+function applyIdentityContext(persona: Persona) {
   identityContext = {
     memberId: persona.profile.memberId,
     email: persona.profile.email,
@@ -137,8 +139,40 @@ export function identifyPersona(persona: Persona, page?: string) {
     anonymousId: `anon-${persona.id}`,
   };
   identityInitialized = true;
+  identifiedEmail = persona.profile.email.toLowerCase();
+}
 
-  void sendIdentity(data);
+/** Initialize Cloud SDK identity from a demo persona (email provider). */
+export function identifyPersona(persona: Persona, page?: string) {
+  void identifyPersonaAsync(persona, page);
+}
+
+export async function identifyPersonaAsync(persona: Persona, page?: string) {
+  const slug = page ?? currentPage;
+  const data = buildPersonaIdentityData(persona, slug);
+  applyIdentityContext(persona);
+  await sendIdentity(data);
+}
+
+/**
+ * Switch demo users like a logout: clear Sitecore browser_id/guest cookies,
+ * start a fresh guest session, then IDENTITY the new persona.
+ * Does not fire PERSONA_SWITCH — that would pollute the previous session.
+ */
+export async function switchPersonaTracking(persona: Persona, page?: string) {
+  if (!canTrack()) return;
+
+  const email = persona.profile.email.toLowerCase();
+  if (identifiedEmail && identifiedEmail === email) {
+    return;
+  }
+
+  if (identifiedEmail) {
+    await resetCloudSdkGuest();
+  }
+
+  resetIdentityLocal();
+  await identifyPersonaAsync(persona, page);
 }
 
 /** @deprecated Use identifyPersona — kept for compatibility with persona provider */
@@ -153,6 +187,14 @@ export function getIdentity(): IdentityContext {
 
 export function isTrackingInitialized() {
   return identityInitialized;
+}
+
+export function getIdentifiedPersonaId() {
+  return identityContext.personaId ?? null;
+}
+
+export function getIdentifiedEmail() {
+  return identifiedEmail;
 }
 
 export function trackPageView(eventData: PageViewEvent) {
@@ -213,8 +255,13 @@ export function trackInteraction(name: string, payload?: ExtensionData) {
   trackPortalEvent(name, payload);
 }
 
-/** Reset local identity — useful when switching mock personas */
-export function resetIdentity() {
+function resetIdentityLocal() {
   identityContext = {};
   identityInitialized = false;
+  identifiedEmail = null;
+}
+
+/** Reset local identity state (does not clear Sitecore cookies). */
+export function resetIdentity() {
+  resetIdentityLocal();
 }

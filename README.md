@@ -66,18 +66,19 @@ Uses `@sitecore-cloudsdk/core` and `@sitecore-cloudsdk/events` for browser-side 
 
 **IDENTITY** events fire when a demo persona loads or is switched, using the `email` identifier provider (`alex.rivera@email.com`, etc.).
 
+Switching (or creating) a demo user **resets the Sitecore guest session**: Cloud SDK queue is cleared, `sc_cid` / related cookies are deleted, and a new `browser_id` (`clientId`) is issued before the next IDENTITY. Do not expect mixed personas in one CDP session. `PERSONA_SWITCH` is not sent.
+
 **No automatic page-view or impression events.** Custom events fire only on clicks:
 
 - Hero: `VIEW_APPOINTMENTS`, `VIEW_MESSAGE`
 - Promo CTA: `CLICKED_PROMO`
 - Other CTAs / resources: `CLICKED_CTA`
 - Message open: `OPEN_MESSAGE`
-- Persona switch: `PERSONA_SWITCH`
 - Preference toggles: `PREFERENCE_UPDATE`
 
 Event `type` format: `novacare/VIEW_MESSAGE` (must match `^[a-zA-Z0-9\-_./]{1,100}$`).
 
-Verify payloads in DevTools → Network → filter `edge-platform.sitecorecloud.io`.
+Verify payloads in DevTools → Network → filter `edge-platform.sitecorecloud.io`. To verify persona isolation, check that each profile gets a different `clientId` after a switch.
 
 ## Project structure
 
